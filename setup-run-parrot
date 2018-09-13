@@ -1,0 +1,40 @@
+#!/bin/bash
+
+cd /tmp
+if ! [ -d cctools-7.0.4-x86_64-redhat6 ]; then
+wget http://ccl.cse.nd.edu/software/files/cctools-7.0.4-x86_64-redhat6.tar.gz;
+
+tar xf cctools-7.0.4-x86_64-redhat6.tar.gz 
+
+
+PUBKEY="/tmp/${USER}-osg.pub"
+cat << EOF > "${PUBKEY}"
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqQGYXTp9cRcMbGeDoijB
+gKNTCEpIWB7XcqIHVXJjfxEkycQXMyZkB7O0CvV3UmmY2K7CQqTnd9ddcApn7BqQ
+/7QGP0H1jfXLfqVdwnhyjIHxmV2x8GIHRHFA0wE+DadQwoi1G0k0SNxOVS5qbdeV
+yiyKsoU4JSqy5l2tK3K/RJE4htSruPCrRCK3xcN5nBeZK5gZd+/ufPIG+hd78kjQ
+Dy3YQXwmEPm7kAZwIsEbMa0PNkp85IDkdR1GpvRvDMCRmUaRHrQUPBwPIjs0akL+
+qoTxJs9k6quV0g3Wd8z65s/k5mEZ+AnHHI0+0CL3y80wnuLSBYmw05YBtKyoa1Fb
+FQIDAQAB
+-----END PUBLIC KEY-----
+EOF
+fi
+cd cctools-7.0.4-x86_64-redhat6/bin
+export PARROT_CVMFS_REPO="<default-repositories>"
+for i in oasis config-osg osgstorage; do 
+
+export PARROT_CVMFS_REPO="$PARROT_CVMFS_REPO $i.opensciencegrid.org:url=http://oasis.opensciencegrid.org/cvmfs/$i.opensciencegrid.org,pubkey=/tmp/osg.pub"
+done
+#for i in nova ligo; do 
+#
+#export PARROT_CVMFS_REPO="$PARROT_CVMFS_REPO $i.osgstorage.org:url=http://oasis.opensciencegrid.org/cvmfs/$i.osgstorage.org,pubkey=/tmp/osg.pub"
+#done
+wget https://raw.githubusercontent.com/oxford-physics/cvmfs_simple/master/files/physics.ox.ac.uk.pub -O /tmp/physics.ox.ac.uk.pub 
+export PARROT_CVMFS_REPO="$PARROT_CVMFS_REPO physics.ox.ac.uk:url=pplxsquid01.physics.ox.ac.uk/cvmfs/physics.ox.ac.uk,pubkey=/tmp/physics.ox.ac.uk.pub"
+
+echo $PARROT_CVMFS_REPO
+export PARROT_ALLOW_SWITCHING_CVMFS_REPOSITORIES=yes
+export HTTP_PROXY='http://pplxsquid01.physics.ox.ac.uk:3128'
+./parrot_run bash
+
